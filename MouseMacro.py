@@ -1,26 +1,26 @@
-#
-#            888                                               .d8888b.   .d8888b.  
-#          888                                               d88P  Y88b d88P  Y88b 
-#         888                                                     .d88P 888        
-#     .d88888  .d88b.  888  888        888  888 .d8888b         8888"  888d888b.  
-#   d88" 888 d8P  Y8b 888  888       888  888 88K               "Y8b. 888P "Y88b 
-#  888  888 88888888 Y88  88P      888  888 "Y8888b.      888    888 888    888 
-#  Y88b 888 Y8b.      Y8bd8P       Y88b 888      X88      Y88b  d88P Y88b  d88P 
-#  "Y88888  "Y8888    Y88P         "Y88888  88888P'       "Y8888P"   "Y8888P"  
-#                                     888                                       
-#                               Y8b d88P                                       
-#                                "Y88P"                                        
-#
-# Author: dev-ys-36 | Sahmyook Univ. CE. 22.
-# Github: dev-ys-36 | https://github.com/dev-ys-36/MouseMacro-Easy
-# License: MIT | https://github.com/dev-ys-36/MouseMacro-Easy/blob/main/LICENSE
-# Version: 1.0.0v | First Released.
-#
-# The copyright indication and this authorization indication shall be
-# recorded in all copies or in important parts of the Software.
-#
 
 import pyautogui, keyboard, pickle, time
+import win32api, win32gui
+
+class draw:
+    def __init__(self):
+        hwnd = win32gui.GetDesktopWindow()
+        self.hdc = win32gui.GetDC(hwnd)
+        
+    def rect(self, x, y, w, h, thickness=2, color=False):
+        left = x - w // 2
+        top = y - h // 2
+        color = win32api.RGB(0,255,0) if not color else win32api.RGB(color[0], color[1], color[2])
+        
+        for i in range(left, left + w):
+            for t in range(thickness):                                  # 두께만큼 반복
+                win32gui.SetPixel(self.hdc, i, top + t, color)          # 상단
+                win32gui.SetPixel(self.hdc, i, top + h - t - 1, color)  # 하단
+        
+        for j in range(top, top + h):
+            for t in range(thickness):                                  # 두께만큼 반복
+                win32gui.SetPixel(self.hdc, left + t, j, color)         # 좌측
+                win32gui.SetPixel(self.hdc, left + w - t - 1, j, color) # 우측
 
 pyautogui.FAILSAFE = False
 
@@ -58,12 +58,21 @@ while setting:
 with open('setting.txt', 'wb') as file:
     pickle.dump(data, file)
 
-for i in data:
-    pyautogui.moveTo(i[0], i[1])
+app = draw()
 
-    if i[3] == 'cr':
-        pyautogui.click(button='right', clicks=i[4])
-    elif i[3] == 'cl':
-        pyautogui.click(button='left', clicks=i[4])
+while True:
+    if keyboard.is_pressed('esc'):
+        print('매크로를 종료합니다.')
+        break
     
-    time.sleep(i[2])
+    for i in data:
+        app.rect(i[0], i[1], 25, 25)
+        
+        pyautogui.moveTo(i[0], i[1])
+
+        if i[3] == 'cr':
+            pyautogui.click(button='right', clicks=i[4])
+        elif i[3] == 'cl':
+            pyautogui.click(button='left', clicks=i[4])
+        
+        time.sleep(i[2])
