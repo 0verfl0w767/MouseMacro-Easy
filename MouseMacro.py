@@ -23,6 +23,7 @@ class draw:
                 win32gui.SetPixel(self.hdc, left + w - t - 1, j, color) # 우측
 
 pyautogui.FAILSAFE = False
+pyautogui.PAUSE = 0
 
 setting = True
 num = 0
@@ -44,15 +45,19 @@ while setting:
         clicks = input('클릭 횟수를 입력하세요: ')
 
         print('지연 시간: ' + delay + '초, 이벤트: ' + event + ', 클릭 횟수: ' + clicks)
-        data_setting = (int(delay), event, int(clicks))
+        data_setting = (float(delay), event, int(clicks))
 
         data.append(mouse_position + data_setting)
-        time.sleep(0.5)
+        # debounce: wait for Ctrl key release to avoid duplicate entries
+        while keyboard.is_pressed('Ctrl'):
+            pass
         continue
 
     if keyboard.is_pressed('Alt'):
         print('매크로 사용자 설정을 마칩니다.')
-        time.sleep(0.5)
+        # debounce: wait for Alt key release
+        while keyboard.is_pressed('Alt'):
+            pass
         break
 
 with open('setting.txt', 'wb') as file:
@@ -68,11 +73,11 @@ while True:
     for i in data:
         app.rect(i[0], i[1], 25, 25)
         
-        pyautogui.moveTo(i[0], i[1])
+        pyautogui.moveTo(i[0], i[1], duration=0)
 
         if i[3] == 'cr':
-            pyautogui.click(button='right', clicks=i[4])
+            pyautogui.click(button='right', clicks=i[4], interval=0)
         elif i[3] == 'cl':
-            pyautogui.click(button='left', clicks=i[4])
+            pyautogui.click(button='left', clicks=i[4], interval=0)
         
         time.sleep(i[2])
